@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
 
 
   if(argc != 5){
-    printf("usage: addvec numelements threads_per_block num_blocks\n type of op");
+    printf("usage: addvec numelements threads_per_block num_blocks type of op\n");
     exit(1);
   }
 

@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
 
 
   if(argc != 5){
-    printf("usage: addvec numelements threads_per_block num_blocks type of op\n");
+    printf("usage: addvec numelements threads_per_block num_blocks\n type of op");
     exit(1);
   }
 
@@ -36,6 +36,13 @@ int main(int argc, char *argv[]){
   numblocks = atoi(argv[3]);
   op = argv[4];  
   threadsperblock = THREADS;
+  int total_threads = threadsperblock * numblocks;
+
+  if(total_threads < num){
+    printf("ERROR: Insufficient threads!\n");
+    printf("Need at least %d blocks for %d elements with %d threads/block\n", (num + THREADS - 1) / THREADS, num, THREADS);
+    exit(1);
+  }
 
   a = (int *)malloc(num*sizeof(int));
   if(!a){

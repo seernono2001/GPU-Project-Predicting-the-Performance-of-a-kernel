@@ -11,13 +11,26 @@ For example:
 It should output something like
 
 ```
-Single thread time = 24.055807 secs
+Number of devices: 2
 
+Device 0:
+name: NVIDIA GeForce RTX 2080 Ti
+total global memory(KB): 11081664
+shared mem per block: 49152
+warp size: 32
+clock rate(KHz): 1635000
+
+Device 1:
+name: NVIDIA GeForce RTX 2080 Ti
+total global memory(KB): 11081664
+shared mem per block: 49152
+warp size: 32
+clock rate(KHz): 1635000
+
+Single thread time = 5.192832 secs
 GPU: 5 blocks of 32 threads each
-
-Kernel time = 0.042080 secs
-
-Speedup: 571.67x
+Kernel time = 0.063936 secs
+Speedup: 81.22x
 ```
 ## Automation Script — experiment_automation.py
 

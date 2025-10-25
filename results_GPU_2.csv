@@ -1,4 +1,4 @@
-GPU,ProblemSize,ThreadsPerBlock,NumBlocks,AlignmentOperation,Avg_SingleThreadTime(sec),Avg_KernelTime(sec),Avg_Speedup
+GPU,ProblemSize,ThreadsPerBlock,NumBlocks,Alignment,Operation,Avg_SingleThreadTime(sec),Avg_KernelTime(sec),Avg_Speedup
 GPU_2,1398,394,10,bad,addition,9.327584,0.044944,205.10500000000002
 GPU_2,1398,394,12,bad,addition,3.323584,0.040992,81.11500000000001
 GPU_2,1398,394,42,bad,addition,3.303328,0.03144,112.245
@@ -499,3 +499,4 @@ GPU_2,43943988,874,12,bad,addition,3.6920640000000002,16.4560645,0.23
 GPU_2,43943988,874,42,bad,addition,3.965168,14.183504,0.28
 GPU_2,43943988,874,68,bad,addition,3.669392,16.4134715,0.23
 GPU_2,43943988,874,181,bad,addition,3.998064,14.231712,0.28
+

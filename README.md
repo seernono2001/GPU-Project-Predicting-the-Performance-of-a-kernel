@@ -12,6 +12,7 @@ It should output something like
 
 ```
 Number of devices: 2
+Currently using Device: 0
 
 Device 0:
 name: NVIDIA GeForce RTX 2080 Ti
@@ -20,17 +21,10 @@ shared mem per block: 49152
 warp size: 32
 clock rate(KHz): 1635000
 
-Device 1:
-name: NVIDIA GeForce RTX 2080 Ti
-total global memory(KB): 11081664
-shared mem per block: 49152
-warp size: 32
-clock rate(KHz): 1635000
-
-Single thread time = 5.192832 secs
+Single thread time = 5.041408 secs
 GPU: 5 blocks of 32 threads each
-Kernel time = 0.063936 secs
-Speedup: 81.22x
+Kernel time = 0.039840 secs
+Speedup: 126.54x
 ```
 ## Automation Script — experiment_automation.py
 

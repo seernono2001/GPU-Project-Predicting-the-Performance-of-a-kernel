@@ -1,0 +1,1 @@
+GPU,ProblemSize,ThreadsPerBlock,NumBlocks,Operation,Avg_SingleThreadTime(sec),Avg_KernelTime(sec),Avg_Speedup

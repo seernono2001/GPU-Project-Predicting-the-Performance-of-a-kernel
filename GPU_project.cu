@@ -192,6 +192,9 @@ void getDeviceInformation() {
   cudaDeviceProp dev;
   int dev_cnt = 0;
 
+  int currentDevice;
+  cudaGetDevice(&currentDevice);
+
 	// return device numbers with compute capability >= 1.0
 	error = cudaGetDeviceCount(&dev_cnt);
 	if (error != cudaSuccess)
@@ -200,20 +203,20 @@ void getDeviceInformation() {
 		exit(-1);
 	}
 	printf("Number of devices: %d\n", dev_cnt);
+  printf("Currently using Device: %d\n", currentDevice);
 
 	// Get properties of each device
-	for (int i = 0; i < dev_cnt; i++) {
-		error = cudaGetDeviceProperties(&dev, i);
-		if (error != cudaSuccess)
-		{
-			printf("Error: %s\n", cudaGetErrorString(error));
-			exit(-1);
-		}
-		printf("\nDevice %d:\n", i);
-		printf("name: %s\n", dev.name);
-		printf("total global memory(KB): %ld\n", dev.totalGlobalMem / 1024);
-		printf("shared mem per block: %d\n", dev.sharedMemPerBlock);
-		printf("warp size: %d\n", dev.warpSize);
-		printf("clock rate(KHz): %d\n", dev.clockRate);
-	}
+  error = cudaGetDeviceProperties(&dev, currentDevice);
+  if (error != cudaSuccess)
+  {
+    printf("Error: %s\n", cudaGetErrorString(error));
+    exit(-1);
+  }
+  printf("\nDevice %d:\n", currentDevice);
+  printf("name: %s\n", dev.name);
+  printf("total global memory(KB): %ld\n", dev.totalGlobalMem / 1024);
+  printf("shared mem per block: %d\n", dev.sharedMemPerBlock);
+  printf("warp size: %d\n", dev.warpSize);
+  printf("clock rate(KHz): %d\n", dev.clockRate);
+	
 }

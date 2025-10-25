@@ -8,7 +8,7 @@ CHANGE THE FOLLOWING PARAMETERS AS NEEDED BETWEEN THESE LINES
 EXECUTABLE = "./gpu_project"
 GPU = "GPU_2" # CHANGE THE NAME FOR EACH GPU
 REPETITION = 2 # SMALL NUMBER FOR TESTING (to mitigate noise) - repetition for each configuration
-OPERATION = ["addition"]
+OPERATION = "addition"
 
 CONFIGURATION_FILE = "random_configs.csv"
 ########################################################################

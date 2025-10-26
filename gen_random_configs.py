@@ -6,16 +6,15 @@ import math, random, csv
 RANDOM PARAMETER GENERATOR---
 CHANGE THE FOLLOWING PARAMETERS AS NEEDED BETWEEN THESE LINES
 '''
-NUM_EXPERIMENTS = 200
 PROBLEM_MIN, PROBLEM_MAX = 1000, 100000000 # 10K -> 100M elements
 BLOCKS_MIN, BLOCKS_MAX = 1, 1024 # grid range
 THREAD_MIN, THREAD_MAX = 32, 1024 # CUDA range (max 1024)
 
 # number of problem sizes, threads, blocks
-NUM_PROBLEMS = 10 
+NUM_PROBLEMS = 1000
 NUM_THREADS = 10 
 NUM_BLOCKS = 5 
-# sample size for each GPU = 500
+# sample size for each GPU = 50,000
 ########################################################################
 
 configs = []
@@ -45,7 +44,6 @@ num_blocks = random.sample(range(BLOCKS_MIN, BLOCKS_MAX + 1), NUM_BLOCKS)
 
 # GENERATE COMBINATIONS
 configs = []
-configs = []
 for ps in problem_sizes:
     for tpb in threads_per_block:
         for nb in num_blocks:
@@ -60,7 +58,8 @@ print(f"Generated {len(configs)} configurations ({NUM_PROBLEMS}×{NUM_THREADS}×
 # WRITE TO CSV FILE
 with open("random_configs.csv", "w", newline="") as f:
     writer = csv.writer(f)
-    writer.writerow(["ProblemSize", "ThreadsPerBlock", "NumBlocks", "Alignment"])
-    writer.writerows(configs)
+    writer.writerow(["Index","ProblemSize", "ThreadsPerBlock", "NumBlocks", "Alignment"])
+    for i, (ps, tpb, nb, align) in enumerate(configs, start =1):
+         writer.writerow([i, ps, tpb, nb, align])
 
 print("Generated file: random_configs.csv")

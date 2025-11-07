@@ -10,7 +10,8 @@ RANDOM PARAMETER GENERATOR---
 CHANGE THE FOLLOWING PARAMETERS AS NEEDED BETWEEN THESE LINES
 '''
 PROBLEM_MIN, PROBLEM_MAX = 1000, 100000000 # 10K -> 100M elements
-BLOCKS_MIN, BLOCKS_MAX = 1, 1024 # grid range
+BLOCKS_MIN, BLOCKS_MAX = 1, 65535 # grid range (65,535 max for CUDA)
+BLOCK_MULTIPLIER = 2.0  # controls randomizations spread of blocks
 THREAD_MIN, THREAD_MAX = 32, 1024 # CUDA range (max 1024)
 
 # number of problem sizes, threads, blocks
@@ -27,7 +28,9 @@ problem_sizes = [int(round(10 ** random.uniform(math.log10(PROBLEM_MIN), math.lo
 problem_sizes = sorted(set(problem_sizes))
 good_threads = [i for i in range(THREAD_MIN, THREAD_MAX + 1) if i % 32 == 0]
 bad_threads  = [i for i in range(THREAD_MIN, THREAD_MAX + 1) if i % 32 != 0]
-num_blocks = sorted(set(int(round(10 ** random.uniform(math.log10(BLOCKS_MIN), math.log10(BLOCKS_MAX)))) for i in range(NUM_PROBLEMS)))
+
+# from old version
+# num_blocks = sorted(set(int(round(10 ** random.uniform(math.log10(BLOCKS_MIN), math.log10(BLOCKS_MAX)))) for i in range(NUM_PROBLEMS)))
 
 
 ''' CODE FOR UNIFORM SAMPLING
@@ -48,12 +51,22 @@ for ps in problem_sizes:
     else:
         tpb = random.choice(bad_threads)
         alignment = "bad"
-    
-    nb = int(round(10 ** random.uniform(math.log10(BLOCKS_MIN), math.log10(BLOCKS_MAX))))
+
+    # compute minimum blocks needed to cover problem size
+    blocks_min = math.ceil(ps / tpb)
+    if blocks_min > BLOCKS_MAX:
+        blocks_min = BLOCKS_MAX
+        blocks_max = BLOCKS_MAX
+    else:
+        blocks_max = int(min(blocks_min * BLOCK_MULTIPLIER, BLOCKS_MAX))
+    nb = random.randint(max(1, blocks_min), max(1, blocks_max)) # choose rand num btwn min and max
+
+    # old method
+    # nb = int(round(10 ** random.uniform(math.log10(BLOCKS_MIN), math.log10(BLOCKS_MAX))))
     configs.append((ps, tpb, nb, alignment))
 
 
-print(f"Generated {len(configs)} configurations)")
+print(f"Generated {len(configs)} configurations")
 
 # WRITE TO CSV FILE
 with open("random_configs.csv", "w", newline="") as f:

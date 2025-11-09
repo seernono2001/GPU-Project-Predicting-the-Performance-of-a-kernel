@@ -11,10 +11,11 @@ REPETITION = 2 # SMALL NUMBER FOR TESTING (to mitigate noise) - repetition for e
 OPERATION = "addition"
 
 CONFIGURATION_FILE = "random_configs.csv"
-########################################################################
 
 # Updates the CSV FILE NAME WITH THE GPU NAME
-CSV_FILE = f"results_{GPU}.csv"
+CSV_FILE = f"results_addition_{GPU}.csv"
+########################################################################
+
 
 # CSV FILE
 with open(CSV_FILE, "w", newline="") as f:

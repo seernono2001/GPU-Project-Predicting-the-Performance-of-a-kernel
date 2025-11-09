@@ -20,6 +20,10 @@ NUM_PROBLEMS = 1000
 ########################################################################
 configs = []
 
+# Optional -- but cap for maxtrix multiplcation memory constraint
+MAX_DIM = 2048
+MAX_ELEMENTS = MAX_DIM * MAX_DIM
+
 # Generates Lists
 '''
 Logarmithic + Uniform Sampling Mix
@@ -44,6 +48,10 @@ num_blocks = random.sample(range(BLOCKS_MIN, BLOCKS_MAX + 1), NUM_BLOCKS)
 
 # GENERATE COMBINATIONS
 for ps in problem_sizes:
+    # Clamp for safe memory size (for matrix kernels)
+    if ps > MAX_ELEMENTS:
+        ps = MAX_ELEMENTS
+
     # Randomly decide alignment type (50% chance)
     if random.random() < 0.5:
         tpb = random.choice(good_threads)
@@ -54,15 +62,26 @@ for ps in problem_sizes:
 
     # compute minimum blocks needed to cover problem size
     blocks_min = math.ceil(ps / tpb)
+    # ADJUSTMENT 1: If too many blocks, inc threads to reduce blocks
     if blocks_min > BLOCKS_MAX:
-        blocks_min = BLOCKS_MAX
-        blocks_max = BLOCKS_MAX
-    else:
-        blocks_max = int(min(blocks_min * BLOCK_MULTIPLIER, BLOCKS_MAX))
+        tpb = math.ceil(ps / BLOCKS_MAX) # threads per block should be less then or rqual to 65,535
+        # This is the CUDA THEAD LIMIT
+        if tpb > THREAD_MAX:
+            tpb = THREAD_MAX
+        blocks_min = math.ceil(ps / tpb)  # Recalc blocks after increasing threads
+
+    # Randomized block range
+    blocks_max = int(min(blocks_min * BLOCK_MULTIPLIER, BLOCKS_MAX))
     nb = random.randint(max(1, blocks_min), max(1, blocks_max)) # choose rand num btwn min and max
 
     # old method
     # nb = int(round(10 ** random.uniform(math.log10(BLOCKS_MIN), math.log10(BLOCKS_MAX))))
+    # Adjustment 2: Final check to make sure everything is covered
+    if nb * tpb < ps:
+        nb = math.ceil(ps / tpb)
+        if nb > BLOCKS_MAX:
+            nb = BLOCKS_MAX
+
     configs.append((ps, tpb, nb, alignment))
 
 

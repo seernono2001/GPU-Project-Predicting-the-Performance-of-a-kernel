@@ -1,0 +1,40 @@
+
+=== Problem Sizes ===
+Count: 690
+Min: 100
+Max: 2043
+Mean: 783.39
+Median: 636.5
+Std Dev: 546.91
+25th percentile (Q1): 309.5
+75th percentile (Q3): 1186.25
+IQR (Q3 - Q1): 876.75
+Mode: 100
+
+=== Threads Per Block ===
+Count: 690
+Min: 32
+Max: 1024
+Mean: 538.49
+Median: 544.0
+Std Dev: 301.47
+25th percentile (Q1): 288.0
+75th percentile (Q3): 824.0
+IQR (Q3 - Q1): 536.0
+Mode: 1024
+
+=== Num Blocks ===
+Count: 690
+Min: 1
+Max: 84
+Mean: 5.04
+Median: 3.0
+Std Dev: 7.96
+25th percentile (Q1): 2.0
+75th percentile (Q3): 5.0
+IQR (Q3 - Q1): 3.0
+Mode: 2
+
+=== Alignment Distribution ===
+bad: 326 (47.2%)
+good: 364 (52.8%)

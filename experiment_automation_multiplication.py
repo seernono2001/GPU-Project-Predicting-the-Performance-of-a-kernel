@@ -10,7 +10,7 @@ GPU = "GPU_2" # CHANGE THE NAME FOR EACH GPU
 REPETITION = 2 # SMALL NUMBER FOR TESTING (to mitigate noise) - repetition for each configuration
 OPERATION = "multiplication"
 
-CONFIGURATION_FILE = "random_configs.csv"
+CONFIGURATION_FILE = "random_configs_multiplication.csv"
 
 # Updates the CSV FILE NAME WITH THE GPU NAME
 CSV_FILE = f"results_multiplication_{GPU}.csv"

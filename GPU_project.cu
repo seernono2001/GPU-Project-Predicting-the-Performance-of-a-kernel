@@ -5,9 +5,11 @@
 #include <string.h>
 
 __global__ void addvector(int*, int*, int*, int);
+__global__ void subtractvector(int*, int*, int*, int);
 __global__ void MatrixMulKernel(int*, int*, int*, int);
 void matrixMulCPU(int*, int*, int*, int);
 void addVectorCPU(int*, int*, int*, int);
+void subtractVectorCPU(int*, int*, int*, int);
 void getDeviceInformation();
 
 int main(int argc, char* argv[]) {
@@ -45,9 +47,9 @@ int main(int argc, char* argv[]) {
 	int total_threads = threadsperblock * numblocks;
 	total_elements = num;
 
-	if (strcmp(op, "addition") != 0 && strcmp(op, "multiplication") != 0) {
+	if (strcmp(op, "addition") != 0 && strcmp(op, "subtraction") != 0 && strcmp(op, "multiplication") != 0) {
 		printf("Unknown operation: %s\n", op);
-		printf("Available operations: addition, multiplication\n");
+		printf("Available operations: addition, subtraction, multiplication\n");
 		// exit
 		exit(1);
 	}
@@ -155,6 +157,9 @@ int main(int argc, char* argv[]) {
 	if (strcmp(op, "addition") == 0) {
 		addVectorCPU(a, b, c, total_elements);
 	}
+	else if( strcmp(op, "subtraction") == 0){
+		subtractVectorCPU(a, b, c, total_elements);
+	}
 	else if (strcmp(op, "multiplication") == 0) {
 		matrixMulCPU(a, b, c, num);
 	}
@@ -192,6 +197,9 @@ int main(int argc, char* argv[]) {
 	if (strcmp(op, "addition") == 0) {
 		addvector << <numblocks, threadsperblock >> > (ad, bd, cd, total_elements);
 	}
+	else if( strcmp(op, "subtraction") == 0){
+		subtractvector << <numblocks, threadsperblock >> > (ad, bd, cd, total_elements);
+	}
 	else if (strcmp(op, "multiplication") == 0) {
 		MatrixMulKernel << <grid, block >> > (ad, bd, cd, num);
 	}
@@ -203,6 +211,9 @@ int main(int argc, char* argv[]) {
 	//Launch the kernel
 	if (strcmp(op, "addition") == 0) {
 		addvector << <numblocks, threadsperblock >> > (ad, bd, cd, total_elements);
+	}
+	else if( strcmp(op, "subtraction") == 0){
+		subtractvector << <numblocks, threadsperblock >> > (ad, bd, cd, total_elements);
 	}
 	else if (strcmp(op, "multiplication") == 0) {
 		MatrixMulKernel << <grid, block >> > (ad, bd, cd, num);
@@ -227,6 +238,13 @@ int main(int argc, char* argv[]) {
 				printf("Incorrect result for element c[%d] = %d\n", i, c[i]);
 			}
 		}
+	}
+	else if(strcmp(op, "subtraction") == 0){
+		for (i = 0; i < total_elements; i++) {
+			if (c[i] != (a[i] - b[i])) {
+				printf("Incorrect result for element c[%d] = %d\n", i, c[i]);
+			}
+		}		
 	}
 	else if (strcmp(op, "multiplication") == 0) {
 		int* c_ref = (int*)malloc(total_elements * sizeof(int));
@@ -255,7 +273,8 @@ int main(int argc, char* argv[]) {
 			printf("  %d elements are zero (%.2f%% - possibly not computed)\n", zero_count, 100.0 * zero_count / total_elements);
 		free(c_ref);
 		}
-	}	//add more operations here
+	}	
+		//add more operations here
 
 	free(a);
 	free(b);
@@ -298,6 +317,16 @@ __global__ void addvector(int* a, int* b, int* c, int n) {
 	}
 }
 
+__global__ void subtractvector(int* a, int* b, int* c, int n) {
+	int index;
+
+	index = (blockIdx.x * blockDim.x) + threadIdx.x;
+
+	if (index < n) {
+		c[index] = a[index] - b[index];
+	}
+}
+
 void matrixMulCPU(int* M, int* N, int* P, int Width) {
 	for (int row = 0; row < Width; ++row) {
 		for (int col = 0; col < Width; ++col) {
@@ -315,6 +344,12 @@ void matrixMulCPU(int* M, int* N, int* P, int Width) {
 void addVectorCPU(int* a, int* b, int* c, int n) {
 	for (int i = 0; i < n; i++) {
 		c[i] = a[i] + b[i];
+	}
+}
+
+void subtractVectorCPU(int* a, int* b, int* c, int n) {
+	for (int i = 0; i < n; i++) {
+		c[i] = a[i] - b[i];
 	}
 }
 

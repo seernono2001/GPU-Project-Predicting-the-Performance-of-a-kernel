@@ -7,9 +7,11 @@
 __global__ void addvector(int*, int*, int*, int);
 __global__ void subtractvector(int*, int*, int*, int);
 __global__ void MatrixMulKernel(int*, int*, int*, int);
+__global__ void minReductionKernel(int*, int*, int);
 void matrixMulCPU(int*, int*, int*, int);
 void addVectorCPU(int*, int*, int*, int);
 void subtractVectorCPU(int*, int*, int*, int);
+void minReductionCPU(int*, int*, int);
 void getDeviceInformation();
 
 int main(int argc, char* argv[]) {
@@ -47,9 +49,10 @@ int main(int argc, char* argv[]) {
 	int total_threads = threadsperblock * numblocks;
 	total_elements = num;
 
-	if (strcmp(op, "addition") != 0 && strcmp(op, "subtraction") != 0 && strcmp(op, "multiplication") != 0) {
+	if (strcmp(op, "addition") != 0 && strcmp(op, "subtraction") != 0 && 
+	    strcmp(op, "multiplication") != 0 && strcmp(op, "reduction") != 0) {
 		printf("Unknown operation: %s\n", op);
-		printf("Available operations: addition, subtraction, multiplication\n");
+		printf("Available operations: addition, subtraction, multiplication, reduction\n");
 		// exit
 		exit(1);
 	}
@@ -78,6 +81,14 @@ int main(int argc, char* argv[]) {
 			printf("WARNING: INFO: Over-provisioned. Some threads will be idle.\n");
 		}
 
+	}
+	else if(strcmp(op, "reduction") == 0) {
+		total_elements = num;
+		if (total_threads < total_elements) {
+			printf("ERROR: Insufficient threads!\n");
+			printf("Need at least %d blocks for %d elements with %d threads/block\n", (total_elements + THREADS - 1) / THREADS, total_elements, THREADS);
+			exit(1);
+		}
 	}
 	else{
 		if (total_threads < total_elements) {
@@ -163,7 +174,9 @@ int main(int argc, char* argv[]) {
 	else if (strcmp(op, "multiplication") == 0) {
 		matrixMulCPU(a, b, c, num);
 	}
-	//add more operations here
+	else if (strcmp(op, "reduction") == 0) {
+		minReductionCPU(a, c, total_elements);
+	}
 
 	single_end = clock();  // end of measuring
 	single_time_taken = ((double)(single_end - single_start)) / CLOCKS_PER_SEC;
@@ -203,6 +216,9 @@ int main(int argc, char* argv[]) {
 	else if (strcmp(op, "multiplication") == 0) {
 		MatrixMulKernel << <grid, block >> > (ad, bd, cd, num);
 	}
+	else if (strcmp(op, "reduction") == 0) {
+		minReductionKernel << <numblocks, threadsperblock >> > (ad, cd, total_elements);
+	}
 	cudaDeviceSynchronize();
 
 	//start measuring time for GPU
@@ -217,6 +233,9 @@ int main(int argc, char* argv[]) {
 	}
 	else if (strcmp(op, "multiplication") == 0) {
 		MatrixMulKernel << <grid, block >> > (ad, bd, cd, num);
+	}
+	else if (strcmp(op, "reduction") == 0) {
+		minReductionKernel << <numblocks, threadsperblock >> > (ad, cd, total_elements);
 	}
 
 	cudaDeviceSynchronize(); //block host till device is done.
@@ -273,8 +292,28 @@ int main(int argc, char* argv[]) {
 			printf("  %d elements are zero (%.2f%% - possibly not computed)\n", zero_count, 100.0 * zero_count / total_elements);
 		free(c_ref);
 		}
-	}	
-		//add more operations here
+	}
+	else if (strcmp(op, "reduction") == 0) {
+		int gpu_min = c[0];
+		for (i = 1; i < numblocks; i++) {
+			if (c[i] < gpu_min) {
+				gpu_min = c[i];
+			}
+		}
+		int cpu_min = a[0];
+		for (i = 1; i < total_elements; i++) {
+			if (a[i] < cpu_min) {
+				cpu_min = a[i];
+			}
+		}
+		printf("\nCPU minimum: %d\n", cpu_min);
+		printf("GPU minimum: %d\n", gpu_min);
+		if (gpu_min != cpu_min) {
+			printf("Incorrect result! Expected %d, got %d\n", cpu_min, gpu_min);
+		} else {
+			printf("Result verified correctly!\n");
+		}
+	}
 
 	free(a);
 	free(b);
@@ -327,6 +366,29 @@ __global__ void subtractvector(int* a, int* b, int* c, int n) {
 	}
 }
 
+__global__ void minReductionKernel(int* input, int* output, int n) {
+	__shared__ int sdata[1024];
+	int tid = threadIdx.x;
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	if (index < n) {
+		sdata[tid] = input[index];
+	} else {
+		sdata[tid] = 2147483647; // INT_MAX
+	}
+	__syncthreads();
+	for (int s = blockDim.x / 2; s > 0; s >>= 1) {
+		if (tid < s) {
+			if (sdata[tid + s] < sdata[tid]) {
+				sdata[tid] = sdata[tid + s];
+			} 
+		}
+		__syncthreads();
+	}
+	if (tid == 0) {
+		output[blockIdx.x] = sdata[0];
+	}
+}
+
 void matrixMulCPU(int* M, int* N, int* P, int Width) {
 	for (int row = 0; row < Width; ++row) {
 		for (int col = 0; col < Width; ++col) {
@@ -351,6 +413,16 @@ void subtractVectorCPU(int* a, int* b, int* c, int n) {
 	for (int i = 0; i < n; i++) {
 		c[i] = a[i] - b[i];
 	}
+}
+
+void minReductionCPU(int* a, int* c, int n) {
+	int min = a[0];
+	for (int i = 1; i < n; i++) {
+		if (a[i] < min) {
+			min = a[i];
+		}
+	}
+	c[0] = min;
 }
 
 void getDeviceInformation() {

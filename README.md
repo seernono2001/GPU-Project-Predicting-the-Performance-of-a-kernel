@@ -1,12 +1,36 @@
 # GPU-Project-Predicting-the-Performance-of-a-kernel
 
+## Setups
+
+1. SSH TO A CUDA SERVER
+    - Example (using GPU 2):
+       ```
+       ssh cuda2.cims.nyu.edu
+       ```
+2. LOAD CUDA MODULE
+    - Example:
+      ```
+      module avail cuda
+      module load cuda-12.2
+      ```
+      
+## CUDA Benchmark Program — GPU_project.cu
+
+Compile:
+
+`nvcc -o project GPU_project.cu -lm`
+
 Run commands:
 
-`./vectorprog [PROBLEM_SIZE] [NUM_THREADS] [NUM_BLOCKS] [OPERATION]`
+`./project [PROBLEM_SIZE] [NUM_THREADS] [NUM_BLOCKS] [OPERATION]`
 
 For example:
 
-`./vectorprog 100 32 5 addition`
+`./project 100 32 5 addition`
+
+Available Operations:
+
+`addtion`, `subtraction`, `multiplication`, and `reduction`
 
 It should output something like
 
@@ -40,18 +64,7 @@ The automation script tests CUDA kernel performance across different configurati
 Each GPU node generates its own CSV file, which can later be merged into one master dataset for ML analysis.
 
 ### How to run the automation script:
-1. SSH TO A CUDA SERVER
-    - Example (using GPU 2):
-       ```
-       ssh cuda2.cims.nyu.edu
-       ```
-2. LOAD CUDA MODULE
-    - Example:
-      ```
-      module avail cuda
-      module load cuda-12.2
-      ```
-3. RUN THE AUTOMATION SCRIPT
-    ```
-    python3 experiment_automation.py
-    ```
+
+ RUN THE AUTOMATION SCRIPT:
+ 
+`python3 experiment_automation.py`

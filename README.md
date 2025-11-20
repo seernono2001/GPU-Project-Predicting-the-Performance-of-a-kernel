@@ -67,4 +67,5 @@ Each GPU node generates its own CSV file, which can later be merged into one mas
 
  RUN THE AUTOMATION SCRIPT:
  
-`python3 experiment_automation.py`
+`python3 experiment_automation_(insert_name_of_operation).py`
+replace the (insert_name_of_operation) with either `addition`, `subtraction`, `multiplication`, or `reduction`
